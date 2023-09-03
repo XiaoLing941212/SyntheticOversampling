@@ -1,3 +1,10 @@
+"""
+This file contains necessary TABGAN and related functions
+
+Reference: https://github.com/LyudaK/msc_thesis_imblearn/blob/main/ImbLearn.ipynb
+Modified by: Xiao Ling, xling4@ncsu.edu
+"""
+
 import pandas as pd
 from tabgan.sampler import OriginalGenerator, GANGenerator
 

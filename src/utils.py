@@ -15,4 +15,11 @@ def evaluate_result(y_pred, y_true):
     g_score = 2 * recall * (1 - fpr) / (recall + 1 - fpr)
     d2h = math.sqrt((1 - recall)**2 + (0 - fpr)**2) / math.sqrt(2)
 
-    return tn, fp, fn, tp, recall, fpr, precision, accuracy, f1, roc_auc, g_score, d2h
+    return [round(accuracy, 3), 
+            round(precision, 3), 
+            round(recall, 3), 
+            round(fpr, 3), 
+            round(f1, 3), 
+            round(roc_auc, 3), 
+            round(g_score, 3), 
+            round(d2h, 3)]
