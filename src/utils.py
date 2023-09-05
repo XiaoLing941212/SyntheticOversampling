@@ -2,6 +2,7 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import recall_score, accuracy_score, f1_score, roc_auc_score, precision_score
 
 import math
+import numpy as np
 
 def evaluate_result(y_pred, y_true):
     tn, fp, fn, tp = confusion_matrix(y_true=y_true, y_pred=y_pred).ravel()
@@ -23,3 +24,15 @@ def evaluate_result(y_pred, y_true):
             round(roc_auc, 3), 
             round(g_score, 3), 
             round(d2h, 3)]
+
+
+def parse_results(res):
+    res = res.replace('(', '').replace(')', '').replace('[', '').replace(']', '')
+    res = res.replace('array', '').replace(' ', '')
+    res_to_list = res.split(",")
+    res_to_list = [np.float(i) for i in res_to_list]
+    res_to_list[0] = np.int(np.round_(res_to_list[0]))
+    res_to_list[1] = np.int(np.round_(res_to_list[1]))
+    res_to_list[2] = np.int(np.round_(res_to_list[2]))
+
+    return res_to_list
