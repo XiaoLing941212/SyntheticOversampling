@@ -21,6 +21,7 @@ from utils import parse_results
 import time
 import numpy as np
 import random
+import pandas as pd
 
 def RandomOversampling(X_train, y_train):
     random_oversampler = RandomOverSampler(random_state=42)
@@ -132,6 +133,11 @@ def SMOTUNEDOversampling(X_train, X_test, y_train, y_test, model):
                                        r=result_to_list[1],
                                        neighbours=result_to_list[2])
     
+    col = X_train.columns
+    tar = y_train.name
+    X_train_new = pd.DataFrame(X_train_new, columns=col)
+    y_train_new = pd.Series(y_train_new, name=tar)
+
     return rt, X_train_new, y_train_new
 
 
@@ -232,16 +238,16 @@ def balance(data_train, train_label, m, r, neighbours):
         
     pos_train = np.array(pos_train)
     neg_train = np.array(neg_train)
-
+    
     if len(pos_train) < len(neg_train):
         pos_train = my_smote(pos_train, m, k=neighbours, r=r)
 
         if len(neg_train) < m:
             m = len(neg_train)
         
-        neg_train = neg_train[np.random.choice(len(neg_train), m, replace=False)]
-    
-    data_train1 = np.stack((pos_train, neg_train))
+        neg_train = neg_train[np.random.choice(len(neg_train), len(pos_train), replace=False)]
+
+    data_train1 = np.vstack((pos_train, neg_train))
     label_train = [1] * len(pos_train) + [0] * len(neg_train)
 
     return data_train1, label_train
@@ -249,14 +255,19 @@ def balance(data_train, train_label, m, r, neighbours):
 
 def rf_smotuned_func(X_train, X_test, y_train, y_test, 
                      m, r, neighbours):
-    lab = [y for y in y_train.values.to_list()]
+    lab = [y for y in y_train.values.tolist()]
     train_balanced_x, train_balanced_y = balance(
-        X_train.value, 
+        X_train.values, 
         lab, 
         m=m, 
         r=r, 
         neighbours=neighbours
     )
+
+    col = X_train.columns
+    tar = y_train.name
+    train_balanced_x = pd.DataFrame(train_balanced_x, columns=col)
+    train_balanced_y = pd.Series(train_balanced_y, name=tar)
 
     clf_RF = RandomForestClassifier(random_state=42, n_jobs=-1)
     clf_RF.fit(train_balanced_x, train_balanced_y)
@@ -272,14 +283,19 @@ def rf_smotuned_func(X_train, X_test, y_train, y_test,
 
 def knn_smotuned_func(X_train, X_test, y_train, y_test,
                       m, r, neighbours):
-    lab = [y for y in y_train.values.to_list()]
+    lab = [y for y in y_train.values.tolist()]
     train_balanced_x, train_balanced_y = balance(
-        X_train.value, 
+        X_train.values, 
         lab, 
         m=m, 
         r=r, 
         neighbours=neighbours
     )
+
+    col = X_train.columns
+    tar = y_train.name
+    train_balanced_x = pd.DataFrame(train_balanced_x, columns=col)
+    train_balanced_y = pd.Series(train_balanced_y, name=tar)
 
     clf_KNN = KNeighborsClassifier(n_neighbors=3, n_jobs=-1)
     clf_KNN.fit(train_balanced_x, train_balanced_y)
@@ -295,14 +311,19 @@ def knn_smotuned_func(X_train, X_test, y_train, y_test,
 
 def lr_smotuned_func(X_train, X_test, y_train, y_test,
                      m, r, neighbours):
-    lab = [y for y in y_train.values.to_list()]
+    lab = [y for y in y_train.values.tolist()]
     train_balanced_x, train_balanced_y = balance(
-        X_train.value, 
+        X_train.values, 
         lab, 
         m=m, 
         r=r, 
         neighbours=neighbours
     )
+
+    col = X_train.columns
+    tar = y_train.name
+    train_balanced_x = pd.DataFrame(train_balanced_x, columns=col)
+    train_balanced_y = pd.Series(train_balanced_y, name=tar)
 
     clf_LR = LogisticRegression(random_state=42, solver='saga', max_iter=20000, n_jobs=-1)
     clf_LR.fit(train_balanced_x, train_balanced_y)
@@ -318,14 +339,19 @@ def lr_smotuned_func(X_train, X_test, y_train, y_test,
 
 def dt_smotuned_func(X_train, X_test, y_train, y_test,
                      m, r, neighbours):
-    lab = [y for y in y_train.values.to_list()]
+    lab = [y for y in y_train.values.tolist()]
     train_balanced_x, train_balanced_y = balance(
-        X_train.value, 
+        X_train.values, 
         lab, 
         m=m, 
         r=r, 
         neighbours=neighbours
     )
+
+    col = X_train.columns
+    tar = y_train.name
+    train_balanced_x = pd.DataFrame(train_balanced_x, columns=col)
+    train_balanced_y = pd.Series(train_balanced_y, name=tar)
 
     clf_DT = DecisionTreeClassifier()
     clf_DT.fit(train_balanced_x, train_balanced_y)
@@ -341,14 +367,19 @@ def dt_smotuned_func(X_train, X_test, y_train, y_test,
 
 def svm_smotuned_func(X_train, X_test, y_train, y_test,
                       m, r, neighbours):
-    lab = [y for y in y_train.values.to_list()]
+    lab = [y for y in y_train.values.tolist()]
     train_balanced_x, train_balanced_y = balance(
-        X_train.value, 
+        X_train.values, 
         lab, 
         m=m, 
         r=r, 
         neighbours=neighbours
     )
+
+    col = X_train.columns
+    tar = y_train.name
+    train_balanced_x = pd.DataFrame(train_balanced_x, columns=col)
+    train_balanced_y = pd.Series(train_balanced_y, name=tar)
 
     clf_SVM = SVC()
     clf_SVM.fit(train_balanced_x, train_balanced_y)
@@ -364,14 +395,19 @@ def svm_smotuned_func(X_train, X_test, y_train, y_test,
 
 def lightgbm_smotuned_func(X_train, X_test, y_train, y_test,
                            m, r, neighbours):
-    lab = [y for y in y_train.values.to_list()]
+    lab = [y for y in y_train.values.tolist()]
     train_balanced_x, train_balanced_y = balance(
-        X_train.value, 
+        X_train.values, 
         lab, 
         m=m, 
         r=r, 
         neighbours=neighbours
     )
+
+    col = X_train.columns
+    tar = y_train.name
+    train_balanced_x = pd.DataFrame(train_balanced_x, columns=col)
+    train_balanced_y = pd.Series(train_balanced_y, name=tar)
 
     clf_LightGBM = LGBMClassifier(objective='binary', random_state=42, n_jobs=-1)
     clf_LightGBM.fit(train_balanced_x, train_balanced_y)
@@ -387,14 +423,19 @@ def lightgbm_smotuned_func(X_train, X_test, y_train, y_test,
 
 def adaboost_smotuned_func(X_train, X_test, y_train, y_test,
                            m, r, neighbours):
-    lab = [y for y in y_train.values.to_list()]
+    lab = [y for y in y_train.values.tolist()]
     train_balanced_x, train_balanced_y = balance(
-        X_train.value, 
+        X_train.values, 
         lab, 
         m=m, 
         r=r, 
         neighbours=neighbours
     )
+
+    col = X_train.columns
+    tar = y_train.name
+    train_balanced_x = pd.DataFrame(train_balanced_x, columns=col)
+    train_balanced_y = pd.Series(train_balanced_y, name=tar)
 
     clf_Adaboost = AdaBoostClassifier(n_estimators=100, random_state=42)
     clf_Adaboost.fit(train_balanced_x, train_balanced_y)
@@ -410,16 +451,21 @@ def adaboost_smotuned_func(X_train, X_test, y_train, y_test,
 
 def gbdt_smotuned_func(X_train, X_test, y_train, y_test,
                            m, r, neighbours):
-    lab = [y for y in y_train.values.to_list()]
+    lab = [y for y in y_train.values.tolist()]
     train_balanced_x, train_balanced_y = balance(
-        X_train.value, 
+        X_train.values, 
         lab, 
         m=m, 
         r=r, 
         neighbours=neighbours
     )
 
-    clf_GBDT = GradientBoostingClassifier(objective='binary', random_state=42, n_jobs=-1)
+    col = X_train.columns
+    tar = y_train.name
+    train_balanced_x = pd.DataFrame(train_balanced_x, columns=col)
+    train_balanced_y = pd.Series(train_balanced_y, name=tar)
+
+    clf_GBDT = GradientBoostingClassifier(n_estimators=100, learning_rate=1.0, random_state=42)
     clf_GBDT.fit(train_balanced_x, train_balanced_y)
     predictions = clf_GBDT.predict(X_test)
 

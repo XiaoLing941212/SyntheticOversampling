@@ -56,7 +56,7 @@ def train_step(real_data, gen, critic, noise_dim, generator_optimizer, critic_op
     gradients_of_critic = critic_tape.gradient(critic_loss, critic.trainable_variables)
 
     generator_optimizer.apply_gradients(zip(gradients_of_generator, gen.trainable_variables))
-    critic_optimizer.appply_gradients(zip(gradients_of_critic, critic.trainable_variables))
+    critic_optimizer.apply_gradients(zip(gradients_of_critic, critic.trainable_variables))
 
     tf.group(*(var.assign(tf.clip_by_value(var, -0.01, 0.01)) for var in critic.trainable_variables))
 

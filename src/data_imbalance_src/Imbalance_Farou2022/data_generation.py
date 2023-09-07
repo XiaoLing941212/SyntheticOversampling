@@ -9,8 +9,14 @@ import tensorflow as tf
 import pandas as pd
 import numpy as np
 import collections
+import os
+import time
 
-from WGAN import Generator, Critic, train_step
+from sklearn.preprocessing import StandardScaler
+from sklearn.utils import shuffle
+from sklearn.model_selection import train_test_split
+
+from data_imbalance_src.Imbalance_Farou2022.WGAN import Generator, Critic, train_step
 
 def generate_synthetic_samples(generator, class_id, headers_name, nb_instance, noise_dim):
     fake_data = generator(tf.random.normal([nb_instance, noise_dim]))
@@ -113,3 +119,35 @@ def gen_data(X_train, y_train, target, classes):
             new_data = new_data.append(synthetic_data)
     
     return new_data
+
+
+def GANOversampling(X_train, y_train):
+    tar = y_train.name
+
+    start_time = time.time()
+
+    X_sample = gen_data(X_train=X_train, y_train=y_train,
+                        target=tar, classes=list(y_train.unique()))
+    
+    X_train[tar] = y_train
+    X_sample = X_sample.append(X_train)
+    y_sample = X_sample[tar]
+    X_sample = X_sample.drop(tar, 1)
+
+    return round(time.time() - start_time, 2), X_sample, y_sample
+
+# data_path = f"{os.getcwd()}\\data\\JavaScript_Vulnerability\\"
+# datafiles = [f for f in os.listdir(data_path) if f.endswith("csv")]
+# df = pd.read_csv(f"{data_path}\\{datafiles[0]}")
+# drop_columns = ["name", "longname", "path", "full_repo_path", "line", "column", "endline", "endcolumn"]
+# df = df.drop(drop_columns, axis=1)
+# df = df.drop_duplicates()
+# X = df.iloc[:, :-1]
+# y = df.iloc[:, -1]
+# scaler = StandardScaler()
+# X_normalized = scaler.fit_transform(X)
+# X = pd.DataFrame(X_normalized, columns=X.columns, index=X.index)
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+# rt, X_train_new, y_train_new = GANOversampling(X_train=X_train, y_train=y_train)
+# print(X_train_new)
+# print(str(round(y_train_new.value_counts()[0] / y_train_new.value_counts()[1])))
