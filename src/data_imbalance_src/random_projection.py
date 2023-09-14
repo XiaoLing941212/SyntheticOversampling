@@ -194,18 +194,18 @@ def RandomProjectionOversampling(X_train, y_train):
     return rt, X_train_new, y_train_new
 
 
-data_path = f"{os.getcwd()}\\data\\JavaScript_Vulnerability\\"
-datafiles = [f for f in os.listdir(data_path) if f.endswith("csv")]
-df = pd.read_csv(f"{data_path}\\{datafiles[0]}")
-drop_columns = ["name", "longname", "path", "full_repo_path", "line", "column", "endline", "endcolumn"]
-df = df.drop(drop_columns, axis=1)
-df = df.drop_duplicates()
-X = df.iloc[:, :-1]
-y = df.iloc[:, -1]
-scaler = StandardScaler()
-X_normalized = scaler.fit_transform(X)
-X = pd.DataFrame(X_normalized, columns=X.columns, index=X.index)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
-rt, X_train_new, y_train_new = RandomProjectionOversampling(X_train=X_train, y_train=y_train)
-print(X_train_new)
-print(str(round(y_train_new.value_counts()[0] / y_train_new.value_counts()[1])))
+# data_path = f"{os.getcwd()}\\data\\JavaScript_Vulnerability\\"
+# datafiles = [f for f in os.listdir(data_path) if f.endswith("csv")]
+# df = pd.read_csv(f"{data_path}\\{datafiles[0]}")
+# drop_columns = ["name", "longname", "path", "full_repo_path", "line", "column", "endline", "endcolumn"]
+# df = df.drop(drop_columns, axis=1)
+# df = df.drop_duplicates()
+# X = df.iloc[:, :-1]
+# y = df.iloc[:, -1]
+# scaler = StandardScaler()
+# X_normalized = scaler.fit_transform(X)
+# X = pd.DataFrame(X_normalized, columns=X.columns, index=X.index)
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+# rt, X_train_new, y_train_new = RandomProjectionOversampling(X_train=X_train, y_train=y_train)
+# print(X_train_new)
+# print(str(round(y_train_new.value_counts()[0] / y_train_new.value_counts()[1])))
