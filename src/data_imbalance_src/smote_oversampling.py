@@ -13,6 +13,7 @@ from sklearn.svm import SVC
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from lightgbm import LGBMClassifier
+from sklearn.preprocessing import StandardScaler
 
 from sklearn.metrics import confusion_matrix, recall_score
 
@@ -24,7 +25,8 @@ import random
 import pandas as pd
 
 def RandomOversampling(X_train, y_train):
-    random_oversampler = RandomOverSampler(random_state=42)
+    rs = random.randint(0, 10000)
+    random_oversampler = RandomOverSampler(random_state=rs)
     start_time = time.time()
     X_train_new, y_train_new = random_oversampler.fit_resample(X_train, y_train)
 
@@ -32,7 +34,8 @@ def RandomOversampling(X_train, y_train):
 
 
 def ADASYNOversampling(X_train, y_train):
-    ADASYN_oversampler = ADASYN(random_state=42)
+    rs = random.randint(0, 10000)
+    ADASYN_oversampler = ADASYN(random_state=rs)
     start_time = time.time()
     X_train_new, y_train_new = ADASYN_oversampler.fit_resample(X_train, y_train)
 
@@ -40,7 +43,8 @@ def ADASYNOversampling(X_train, y_train):
 
 
 def BorderlineSMOTEOversampling(X_train, y_train):
-    BorderlineSMOTE_oversampler = BorderlineSMOTE(random_state=42)
+    rs = random.randint(0, 10000)
+    BorderlineSMOTE_oversampler = BorderlineSMOTE(random_state=rs)
     start_time = time.time()
     X_train_new, y_train_new = BorderlineSMOTE_oversampler.fit_resample(X_train, y_train)
 
@@ -48,7 +52,8 @@ def BorderlineSMOTEOversampling(X_train, y_train):
 
 
 def SMOTEOversampling(X_train, y_train):
-    SMOTE_oversampler = SMOTE(random_state=42)
+    rs = random.randint(0, 10000)
+    SMOTE_oversampler = SMOTE(random_state=rs)
     start_time = time.time()
     X_train_new, y_train_new = SMOTE_oversampler.fit_resample(X_train, y_train)
 
@@ -56,7 +61,8 @@ def SMOTEOversampling(X_train, y_train):
 
 
 def SVMSMOTEOversampling(X_train, y_train):
-    SVMSMOTE_oversampler = SVMSMOTE(random_state=42)
+    rs = random.randint(0, 10000)
+    SVMSMOTE_oversampler = SVMSMOTE(random_state=rs)
     start_time = time.time()
     X_train_new, y_train_new = SVMSMOTE_oversampler.fit_resample(X_train, y_train)
 
@@ -269,9 +275,13 @@ def rf_smotuned_func(X_train, X_test, y_train, y_test,
     train_balanced_x = pd.DataFrame(train_balanced_x, columns=col)
     train_balanced_y = pd.Series(train_balanced_y, name=tar)
 
+    scaler = StandardScaler()
+    train_balanced_x = pd.DataFrame(scaler.fit_transform(train_balanced_x), columns=col)
+    X_test_scale = pd.DataFrame(scaler.transform(X_test), columns=col)
+
     clf_RF = RandomForestClassifier(random_state=42, n_jobs=-1)
     clf_RF.fit(train_balanced_x, train_balanced_y)
-    predictions = clf_RF.predict(X_test)
+    predictions = clf_RF.predict(X_test_scale)
 
     tn, fp, fn, tp = confusion_matrix(y_true=y_test, y_pred=predictions).ravel()
     recall = recall_score(y_true=y_test, y_pred=predictions)
@@ -297,9 +307,13 @@ def knn_smotuned_func(X_train, X_test, y_train, y_test,
     train_balanced_x = pd.DataFrame(train_balanced_x, columns=col)
     train_balanced_y = pd.Series(train_balanced_y, name=tar)
 
+    scaler = StandardScaler()
+    train_balanced_x = pd.DataFrame(scaler.fit_transform(train_balanced_x), columns=col)
+    X_test_scale = pd.DataFrame(scaler.transform(X_test), columns=col)
+
     clf_KNN = KNeighborsClassifier(n_neighbors=3, n_jobs=-1)
     clf_KNN.fit(train_balanced_x, train_balanced_y)
-    predictions = clf_KNN.predict(X_test)
+    predictions = clf_KNN.predict(X_test_scale)
 
     tn, fp, fn, tp = confusion_matrix(y_true=y_test, y_pred=predictions).ravel()
     recall = recall_score(y_true=y_test, y_pred=predictions)
@@ -325,9 +339,13 @@ def lr_smotuned_func(X_train, X_test, y_train, y_test,
     train_balanced_x = pd.DataFrame(train_balanced_x, columns=col)
     train_balanced_y = pd.Series(train_balanced_y, name=tar)
 
+    scaler = StandardScaler()
+    train_balanced_x = pd.DataFrame(scaler.fit_transform(train_balanced_x), columns=col)
+    X_test_scale = pd.DataFrame(scaler.transform(X_test), columns=col)
+
     clf_LR = LogisticRegression(random_state=42, solver='saga', max_iter=20000, n_jobs=-1)
     clf_LR.fit(train_balanced_x, train_balanced_y)
-    predictions = clf_LR.predict(X_test)
+    predictions = clf_LR.predict(X_test_scale)
 
     tn, fp, fn, tp = confusion_matrix(y_true=y_test, y_pred=predictions).ravel()
     recall = recall_score(y_true=y_test, y_pred=predictions)
@@ -353,9 +371,13 @@ def dt_smotuned_func(X_train, X_test, y_train, y_test,
     train_balanced_x = pd.DataFrame(train_balanced_x, columns=col)
     train_balanced_y = pd.Series(train_balanced_y, name=tar)
 
+    scaler = StandardScaler()
+    train_balanced_x = pd.DataFrame(scaler.fit_transform(train_balanced_x), columns=col)
+    X_test_scale = pd.DataFrame(scaler.transform(X_test), columns=col)
+
     clf_DT = DecisionTreeClassifier()
     clf_DT.fit(train_balanced_x, train_balanced_y)
-    predictions = clf_DT.predict(X_test)
+    predictions = clf_DT.predict(X_test_scale)
 
     tn, fp, fn, tp = confusion_matrix(y_true=y_test, y_pred=predictions).ravel()
     recall = recall_score(y_true=y_test, y_pred=predictions)
@@ -381,9 +403,13 @@ def svm_smotuned_func(X_train, X_test, y_train, y_test,
     train_balanced_x = pd.DataFrame(train_balanced_x, columns=col)
     train_balanced_y = pd.Series(train_balanced_y, name=tar)
 
+    scaler = StandardScaler()
+    train_balanced_x = pd.DataFrame(scaler.fit_transform(train_balanced_x), columns=col)
+    X_test_scale = pd.DataFrame(scaler.transform(X_test), columns=col)
+
     clf_SVM = SVC()
     clf_SVM.fit(train_balanced_x, train_balanced_y)
-    predictions = clf_SVM.predict(X_test)
+    predictions = clf_SVM.predict(X_test_scale)
 
     tn, fp, fn, tp = confusion_matrix(y_true=y_test, y_pred=predictions).ravel()
     recall = recall_score(y_true=y_test, y_pred=predictions)
@@ -409,9 +435,13 @@ def lightgbm_smotuned_func(X_train, X_test, y_train, y_test,
     train_balanced_x = pd.DataFrame(train_balanced_x, columns=col)
     train_balanced_y = pd.Series(train_balanced_y, name=tar)
 
+    scaler = StandardScaler()
+    train_balanced_x = pd.DataFrame(scaler.fit_transform(train_balanced_x), columns=col)
+    X_test_scale = pd.DataFrame(scaler.transform(X_test), columns=col)
+
     clf_LightGBM = LGBMClassifier(objective='binary', random_state=42, n_jobs=-1)
     clf_LightGBM.fit(train_balanced_x, train_balanced_y)
-    predictions = clf_LightGBM.predict(X_test)
+    predictions = clf_LightGBM.predict(X_test_scale)
 
     tn, fp, fn, tp = confusion_matrix(y_true=y_test, y_pred=predictions).ravel()
     recall = recall_score(y_true=y_test, y_pred=predictions)
@@ -437,9 +467,13 @@ def adaboost_smotuned_func(X_train, X_test, y_train, y_test,
     train_balanced_x = pd.DataFrame(train_balanced_x, columns=col)
     train_balanced_y = pd.Series(train_balanced_y, name=tar)
 
+    scaler = StandardScaler()
+    train_balanced_x = pd.DataFrame(scaler.fit_transform(train_balanced_x), columns=col)
+    X_test_scale = pd.DataFrame(scaler.transform(X_test), columns=col)
+
     clf_Adaboost = AdaBoostClassifier(n_estimators=100, random_state=42)
     clf_Adaboost.fit(train_balanced_x, train_balanced_y)
-    predictions = clf_Adaboost.predict(X_test)
+    predictions = clf_Adaboost.predict(X_test_scale)
 
     tn, fp, fn, tp = confusion_matrix(y_true=y_test, y_pred=predictions).ravel()
     recall = recall_score(y_true=y_test, y_pred=predictions)
@@ -465,9 +499,13 @@ def gbdt_smotuned_func(X_train, X_test, y_train, y_test,
     train_balanced_x = pd.DataFrame(train_balanced_x, columns=col)
     train_balanced_y = pd.Series(train_balanced_y, name=tar)
 
+    scaler = StandardScaler()
+    train_balanced_x = pd.DataFrame(scaler.fit_transform(train_balanced_x), columns=col)
+    X_test_scale = pd.DataFrame(scaler.transform(X_test), columns=col)
+
     clf_GBDT = GradientBoostingClassifier(n_estimators=100, learning_rate=1.0, random_state=42)
     clf_GBDT.fit(train_balanced_x, train_balanced_y)
-    predictions = clf_GBDT.predict(X_test)
+    predictions = clf_GBDT.predict(X_test_scale)
 
     tn, fp, fn, tp = confusion_matrix(y_true=y_test, y_pred=predictions).ravel()
     recall = recall_score(y_true=y_test, y_pred=predictions)
