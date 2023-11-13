@@ -1,0 +1,44 @@
+{
+    "columns": {
+        "nonecholoc": {
+            "sdtype": "numerical"
+        },
+        "loc": {
+            "sdtype": "numerical"
+        },
+        "nmethods": {
+            "sdtype": "numerical"
+        },
+        "ccomdeep": {
+            "sdtype": "numerical"
+        },
+        "ccom": {
+            "sdtype": "numerical"
+        },
+        "nest": {
+            "sdtype": "numerical"
+        },
+        "hvol": {
+            "sdtype": "numerical"
+        },
+        "nIncomingCalls": {
+            "sdtype": "numerical"
+        },
+        "nIncomingCallsUniq": {
+            "sdtype": "numerical"
+        },
+        "nOutgoingInternCalls": {
+            "sdtype": "numerical"
+        },
+        "nOutgoingExternFlsCalled": {
+            "sdtype": "numerical"
+        },
+        "nOutgoingExternFlsCalledUniq": {
+            "sdtype": "numerical"
+        },
+        "nOutgoingExternCallsUniq": {
+            "sdtype": "numerical"
+        }
+    },
+    "METADATA_SPEC_VERSION": "SINGLE_TABLE_V1"
+}
