@@ -38,18 +38,30 @@ def main(project, repeats=10, rp_threshold=12):
             csv_writer = csv.writer(f)
             csv_writer.writerow(["oversampling_scheme", "runtime", "learner", "acc", "prec", "recall", "fpr", "f1", "auc", "g_score", "d2h"])
 
-        df = read_data(project)
-        X = df.iloc[:, :-1]
-        y = df.iloc[:, -1]
-        print("y value counts: \n", str(y.value_counts()))
-        print("y class ratio: 1:", str(round(y.value_counts()[0]/y.value_counts()[1])))
+        if project != "Ambari_Vuln":
+            df = read_data(project)
+            X = df.iloc[:, :-1]
+            y = df.iloc[:, -1]
+            print("y value counts: \n", str(y.value_counts()))
+            print("y class ratio: 1:", str(round(y.value_counts()[0]/y.value_counts()[1])))
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=rs)
-        print("--- y train classes count: \n" + str(y_train.value_counts()))
-        print("--- y train ratio: 1:" + str(round(y_train.value_counts()[0] / y_train.value_counts()[1])))
-        print(" ")
-        print("--- y test classes count: \n" + str(y_test.value_counts()))
-        print("--- y test ratio: 1:" + str(round(y_test.value_counts()[0] / y_test.value_counts()[1])))
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=rs)
+            print("--- y train classes count: \n" + str(y_train.value_counts()))
+            print("--- y train ratio: 1:" + str(round(y_train.value_counts()[0] / y_train.value_counts()[1])))
+            print(" ")
+            print("--- y test classes count: \n" + str(y_test.value_counts()))
+            print("--- y test ratio: 1:" + str(round(y_test.value_counts()[0] / y_test.value_counts()[1])))
+        else:
+            train_df, test_df = read_data(project)
+            X_train = train_df.iloc[:, :-1]
+            y_train = train_df.iloc[:, -1]
+            X_test = test_df.iloc[:, :-1]
+            y_test = test_df.iloc[:, -1]
+            print("--- y train classes count: \n" + str(y_train.value_counts()))
+            print("--- y train ratio: 1:" + str(round(y_train.value_counts()[0] / y_train.value_counts()[1])))
+            print(" ")
+            print("--- y test classes count: \n" + str(y_test.value_counts()))
+            print("--- y test ratio: 1:" + str(round(y_test.value_counts()[0] / y_test.value_counts()[1])))
 
         ### normal run ###
         print("----- normal -----")

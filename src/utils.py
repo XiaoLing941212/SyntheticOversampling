@@ -58,10 +58,40 @@ def read_data(project):
         df['IsVulnerable'] = df['IsVulnerable'].astype('str')
         d = {'b\'yes\'': 1, 'b\'no\'': 0}
         df['IsVulnerable'] = df['IsVulnerable'].astype(str).map(d).fillna(df['IsVulnerable'])
+        print("before drop duplicates", df.shape[0])
         df = df.drop_duplicates()
         df.reset_index(inplace=True, drop=True)
-
-    return df
+        print("after drop duplicates", df.shape[0])
+        return df
+    elif project in ["Defect_Eclipse_JDT_Core", "Defect_Eclipse_PDE_UI", "Defect_Mylyn"]:
+        fname = "_".join(project.split("_")[1:])
+        data_path = f"{os.getcwd()}/data/imbalance_defects_prediction/7_CK_NET_PROC/input/{fname}--CK_NET_PROC.arff"
+        data = arff.loadarff(data_path)
+        df = pd.DataFrame(data[0])
+        df['isBug'] = df['isBug'].astype('str')
+        d = {'b\'YES\'': 1, 'b\'NO\'': 0}
+        df['isBug'] = df['isBug'].astype(str).map(d).fillna(df['isBug'])
+        print("before drop duplicates", df.shape[0])
+        df = df.drop_duplicates()
+        df.reset_index(inplace=True, drop=True)
+        print("after drop duplicates", df.shape[0])
+        return df
+    elif project == "JS_Vuln":
+        data_path = f"{os.getcwd()}/data/JavaScript_Vulnerability/JSVulnerabilityDataSet-1.0.csv"
+        df = pd.read_csv(data_path)
+        drop_columns = ["name", "longname", "path", "full_repo_path", "line", "column", "endline", "endcolumn"]
+        df = df.drop(drop_columns, axis=1)
+        print("before drop duplicates", df.shape[0])
+        df = df.drop_duplicates()
+        df.reset_index(inplace=True, drop=True)
+        print("after drop duplicates", df.shape[0])
+        return df
+    elif project == "Ambari_Vuln":
+        train_data_path = f"{os.getcwd()}/data/Bug_Reports/ambari-train.csv"
+        test_data_path = f"{os.getcwd()}/data/Bug_Reports/ambari-test.csv"
+        train_df = pd.read_csv(train_data_path)
+        test_df = pd.read_csv(test_data_path)
+        return train_df, test_df
 
 
 def create_models():
