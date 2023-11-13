@@ -30,7 +30,6 @@ def main(project, repeats=10, rp_threshold=12):
     for repeat in range(repeats):
         print(f"----- in repeat {repeat+1} -----")
         rs = rs_list[repeat]
-        rs = 381
 
         write_path = f"{project}_res_r{repeat+1}_rn{rs}.csv"
         write_path = f"{os.getcwd()}/result/test/{project}/{write_path}"
