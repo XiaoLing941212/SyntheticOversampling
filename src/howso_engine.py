@@ -16,6 +16,7 @@ def howsoOversampling(
     *,
     desired_conviction: float = 5,
     generate_new_cases: Literal["always", "attempt", "no"] = "no",
+    use_regional_model_residuals: bool = False,
 ) -> Tuple[float, DataFrame, Series]:
     """
     Synthesize a balanced verison of an imbalanced dataset using Howso Engine.
@@ -30,6 +31,8 @@ def howsoOversampling(
         The desired conviction to use when synthesizing the dataset.
     generate_new_cases : {"always", "attempt", "no"}, default "no"
         Whether to enforce privacy constraints when generating.
+    use_regional_model_residuals : bool, default False
+        Whether to use regional model residuals when generating.
     """
     start_time = time.time()
     action_features = X_train.columns.values.tolist()
@@ -54,12 +57,13 @@ def howsoOversampling(
     t.analyze()
 
     reaction = t.react(
+        action_features=action_features,
+        context_features=context_features,
+        contexts=contexts,
         desired_conviction=desired_conviction,
         generate_new_cases=generate_new_cases,
-        contexts=contexts,
-        context_features=context_features,
-        action_features=action_features,
-        num_cases_to_generate=len(contexts)
+        num_cases_to_generate=len(contexts),
+        use_regional_model_residuals=use_regional_model_residuals,
     )
 
     rt = time.time() - start_time
