@@ -1,0 +1,13 @@
+hyperopt==0.2.7
+keras==2.13.1
+scikit-learn==1.2.1
+scipy==1.10.1
+DataSynthesizer==0.1.13
+torch==2.0.1
+seaborn==0.13.0
+matplotlib==3.7.1
+pandas==1.5.3
+howso-engine==9.1.5
+sdv==1.6.0
+lightgbm==4.0.0
+tensorflow==2.13.0
