@@ -35,9 +35,9 @@ def howsoOversampling(
         Whether to use regional model residuals when generating.
     """
     start_time = time.time()
-    action_features = X_train.columns.values.tolist()
     target_feature = y_train.name
     X_train[target_feature] = y_train.values
+    action_features = X_train.columns.values.tolist()
 
     features = infer_feature_attributes(X_train)
     for attributes in features.values():
@@ -67,8 +67,6 @@ def howsoOversampling(
     )
 
     rt = time.time() - start_time
-    X_new = reaction['action']
-    print(X_new)
     X_train_new = reaction['action'].iloc[:, :-1]
     y_train_new = reaction['action'].iloc[:, -1]
 
