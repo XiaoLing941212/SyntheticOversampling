@@ -20,7 +20,7 @@ from smote_oversampling import SMOTUNEDOversampling
 from dazzle import DAZZLEOversampling
 from WGAN import WGANOversampling
 from random_projection import RandomProjectionOversampling
-# from howso_engine import howsoOversampling
+from howso_engine import howsoOversampling
 from ds_engine import DSOversampling
 from sdv_engine import SDVOversampling
 
@@ -32,7 +32,7 @@ def main(project, repeats=10, rp_threshold=12):
         rs = rs_list[repeat]
 
         write_path = f"{project}_res_r{repeat+1}_rn{rs}.csv"
-        write_path = f"{os.getcwd()}/result/test/{project}/{write_path}"
+        write_path = f"{os.getcwd()}/result/{project}/{write_path}"
         with open(write_path, "w", newline="") as f:
             csv_writer = csv.writer(f)
             csv_writer.writerow(["oversampling_scheme", "runtime", "learner", "acc", "prec", "recall", "fpr", "f1", "auc", "g_score", "d2h"])
@@ -498,14 +498,14 @@ def main(project, repeats=10, rp_threshold=12):
         with open(write_path, "a", newline="") as f:
             csv_writer = csv.writer(f)
 
-            csv_writer.writerow(["DAZZLE1", rt, "SVM"] + evaluate_result(y_pred_SVM, y_test))
-            csv_writer.writerow(["DAZZLE1", rt, "KNN"] + evaluate_result(y_pred_KNN, y_test))
-            csv_writer.writerow(["DAZZLE1", rt, "LR"] + evaluate_result(y_pred_LR, y_test))
-            csv_writer.writerow(["DAZZLE1", rt, "DT"] + evaluate_result(y_pred_DT, y_test))
-            csv_writer.writerow(["DAZZLE1", rt, "RF"] + evaluate_result(y_pred_RF, y_test))
-            csv_writer.writerow(["DAZZLE1", rt, "LightGBM"] + evaluate_result(y_pred_LightGBM, y_test))
-            csv_writer.writerow(["DAZZLE1", rt, "Adaboost"] + evaluate_result(y_pred_Adaboost, y_test))
-            csv_writer.writerow(["DAZZLE1", rt, "GBDT"] + evaluate_result(y_pred_GBDT, y_test))
+            csv_writer.writerow(["DAZZLE", rt, "SVM"] + evaluate_result(y_pred_SVM, y_test))
+            csv_writer.writerow(["DAZZLE", rt, "KNN"] + evaluate_result(y_pred_KNN, y_test))
+            csv_writer.writerow(["DAZZLE", rt, "LR"] + evaluate_result(y_pred_LR, y_test))
+            csv_writer.writerow(["DAZZLE", rt, "DT"] + evaluate_result(y_pred_DT, y_test))
+            csv_writer.writerow(["DAZZLE", rt, "RF"] + evaluate_result(y_pred_RF, y_test))
+            csv_writer.writerow(["DAZZLE", rt, "LightGBM"] + evaluate_result(y_pred_LightGBM, y_test))
+            csv_writer.writerow(["DAZZLE", rt, "Adaboost"] + evaluate_result(y_pred_Adaboost, y_test))
+            csv_writer.writerow(["DAZZLE", rt, "GBDT"] + evaluate_result(y_pred_GBDT, y_test))
 
         ### WGAN run ###
         print("----- WGAN -----")
@@ -599,48 +599,48 @@ def main(project, repeats=10, rp_threshold=12):
             csv_writer.writerow(["RP", rt, "GBDT"] + evaluate_result(y_pred_GBDT, y_test))
 
         ### Howso run ###
-        # print("----- Howso -----")
-        # X_train_copy, y_train_copy = X_train.copy(), y_train.copy()
+        print("----- Howso -----")
+        X_train_copy, y_train_copy = X_train.copy(), y_train.copy()
 
-        # rt, X_train_new, y_train_new = howsoOversampling(X_train=X_train_copy,
-        #                                                  y_train=y_train_copy)
+        rt, X_train_new, y_train_new = howsoOversampling(X_train=X_train_copy,
+                                                         y_train=y_train_copy)
         
-        # scaler = StandardScaler()
-        # X_train_scale = pd.DataFrame(scaler.fit_transform(X_train_new), columns=X_train_new.columns, index=X_train_new.index)
-        # X_test_scale = pd.DataFrame(scaler.transform(X_test), columns=X_test.columns, index=X_test.index)
+        scaler = StandardScaler()
+        X_train_scale = pd.DataFrame(scaler.fit_transform(X_train_new), columns=X_train_new.columns, index=X_train_new.index)
+        X_test_scale = pd.DataFrame(scaler.transform(X_test), columns=X_test.columns, index=X_test.index)
 
-        # print("y train ratio: 1:" + str(round(y_train_new.value_counts()[0] / y_train_new.value_counts()[1])))
+        print("y train ratio: 1:" + str(round(y_train_new.value_counts()[0] / y_train_new.value_counts()[1])))
 
-        # clf_SVM, clf_KNN, clf_LR, clf_DT, clf_RF, clf_LightGBM, clf_Adaboost, clf_GBDT = create_models()
-        # clf_SVM.fit(X_train_scale, y_train_new)
-        # clf_KNN.fit(X_train_scale, y_train_new)
-        # clf_LR.fit(X_train_scale, y_train_new)
-        # clf_DT.fit(X_train_scale, y_train_new)
-        # clf_RF.fit(X_train_scale, y_train_new)
-        # clf_LightGBM.fit(X_train_scale, y_train_new)
-        # clf_Adaboost.fit(X_train_scale, y_train_new)
-        # clf_GBDT.fit(X_train_scale, y_train_new)
+        clf_SVM, clf_KNN, clf_LR, clf_DT, clf_RF, clf_LightGBM, clf_Adaboost, clf_GBDT = create_models()
+        clf_SVM.fit(X_train_scale, y_train_new)
+        clf_KNN.fit(X_train_scale, y_train_new)
+        clf_LR.fit(X_train_scale, y_train_new)
+        clf_DT.fit(X_train_scale, y_train_new)
+        clf_RF.fit(X_train_scale, y_train_new)
+        clf_LightGBM.fit(X_train_scale, y_train_new)
+        clf_Adaboost.fit(X_train_scale, y_train_new)
+        clf_GBDT.fit(X_train_scale, y_train_new)
 
-        # y_pred_SVM = clf_SVM.predict(X_test_scale)
-        # y_pred_KNN = clf_KNN.predict(X_test_scale)
-        # y_pred_LR = clf_LR.predict(X_test_scale)
-        # y_pred_DT = clf_DT.predict(X_test_scale)
-        # y_pred_RF = clf_RF.predict(X_test_scale)
-        # y_pred_LightGBM = clf_LightGBM.predict(X_test_scale)
-        # y_pred_Adaboost = clf_Adaboost.predict(X_test_scale)
-        # y_pred_GBDT = clf_GBDT.predict(X_test_scale)
+        y_pred_SVM = clf_SVM.predict(X_test_scale)
+        y_pred_KNN = clf_KNN.predict(X_test_scale)
+        y_pred_LR = clf_LR.predict(X_test_scale)
+        y_pred_DT = clf_DT.predict(X_test_scale)
+        y_pred_RF = clf_RF.predict(X_test_scale)
+        y_pred_LightGBM = clf_LightGBM.predict(X_test_scale)
+        y_pred_Adaboost = clf_Adaboost.predict(X_test_scale)
+        y_pred_GBDT = clf_GBDT.predict(X_test_scale)
 
-        # with open(write_path, "a", newline="") as f:
-        #     csv_writer = csv.writer(f)
+        with open(write_path, "a", newline="") as f:
+            csv_writer = csv.writer(f)
 
-        #     csv_writer.writerow(["Howso", rt, "SVM"] + evaluate_result(y_pred_SVM, y_test))
-        #     csv_writer.writerow(["Howso", rt, "KNN"] + evaluate_result(y_pred_KNN, y_test))
-        #     csv_writer.writerow(["Howso", rt, "LR"] + evaluate_result(y_pred_LR, y_test))
-        #     csv_writer.writerow(["Howso", rt, "DT"] + evaluate_result(y_pred_DT, y_test))
-        #     csv_writer.writerow(["Howso", rt, "RF"] + evaluate_result(y_pred_RF, y_test))
-        #     csv_writer.writerow(["Howso", rt, "LightGBM"] + evaluate_result(y_pred_LightGBM, y_test))
-        #     csv_writer.writerow(["Howso", rt, "Adaboost"] + evaluate_result(y_pred_Adaboost, y_test))
-        #     csv_writer.writerow(["Howso", rt, "GBDT"] + evaluate_result(y_pred_GBDT, y_test))
+            csv_writer.writerow(["Howso", rt, "SVM"] + evaluate_result(y_pred_SVM, y_test))
+            csv_writer.writerow(["Howso", rt, "KNN"] + evaluate_result(y_pred_KNN, y_test))
+            csv_writer.writerow(["Howso", rt, "LR"] + evaluate_result(y_pred_LR, y_test))
+            csv_writer.writerow(["Howso", rt, "DT"] + evaluate_result(y_pred_DT, y_test))
+            csv_writer.writerow(["Howso", rt, "RF"] + evaluate_result(y_pred_RF, y_test))
+            csv_writer.writerow(["Howso", rt, "LightGBM"] + evaluate_result(y_pred_LightGBM, y_test))
+            csv_writer.writerow(["Howso", rt, "Adaboost"] + evaluate_result(y_pred_Adaboost, y_test))
+            csv_writer.writerow(["Howso", rt, "GBDT"] + evaluate_result(y_pred_GBDT, y_test))
 
         ### DS run ###
         print("----- DS -----")
