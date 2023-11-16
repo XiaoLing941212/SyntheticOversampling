@@ -53,6 +53,8 @@ def howsoOversampling(
         overwrite_existing=True
     )
 
+    print(X_train)
+
     t.train(X_train)
     t.analyze()
 
@@ -66,6 +68,8 @@ def howsoOversampling(
         use_regional_model_residuals=use_regional_model_residuals,
     )
 
+    print(reaction["action"])
+    print(reaction["context"])
     rt = time.time() - start_time
     X_train_new = reaction['action'].iloc[:, :-1]
     y_train_new = reaction['action'].iloc[:, -1]
@@ -95,5 +99,6 @@ if __name__ == "__main__":
     rt, X_train_new, y_train_new = howsoOversampling(X_train=X_train, y_train=y_train)
 
     print(X_train_new)
+    print("")
     print(y_train_new)
     print("y train ratio: 1:" + str(round(y_train_new.value_counts()[0] / y_train_new.value_counts()[1])))

@@ -31,6 +31,7 @@ def main(project, repeats=10, rp_threshold=12):
         print(f"----- in repeat {repeat+1} -----")
         rs = rs_list[repeat]
 
+
         write_path = f"{project}_res_r{repeat+1}_rn{rs}.csv"
         write_path = f"{os.getcwd()}/result/{project}/{write_path}"
         with open(write_path, "w", newline="") as f:
