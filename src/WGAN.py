@@ -10,6 +10,11 @@ import pandas as pd
 import numpy as np
 import collections
 import time
+import random
+from pathlib import Path
+import pandas as pd
+from scipy.io import arff
+from sklearn.model_selection import train_test_split
 
 class Generator(tf.keras.Model):
     def __init__(self, output_dim, input_dim, hidden_dim=128):
@@ -39,31 +44,36 @@ class Critic(tf.keras.Model):
         return self.logits(x)
     
 
-@tf.function
-def train_step(real_data, gen, critic, noise_dim, generator_optimizer, critic_optimizer):
-    batch_size = real_data.shape[0]
-    noise = tf.random.normal([batch_size, noise_dim])
+class TrainStep(tf.Module):
+    def __init__(self, generator_optimizer, critic_optimizer):
+        self.generator_optimizer = generator_optimizer
+        self.critic_optimizer = critic_optimizer
 
-    with tf.GradientTape() as gen_tape, tf.GradientTape() as critic_tape:
-        fake_data = gen(noise, training=True)
-        real_output = critic(real_data, training=True)
-        fake_output = critic(fake_data, training=True)
+    @tf.function
+    def __call__(self, real_data, gen, critic, noise_dim):
+        batch_size = real_data.shape[0]
+        noise = tf.random.normal([batch_size, noise_dim])
 
-        critic_loss = tf.reduce_mean(fake_output) - tf.reduce_mean(real_output)
-        critic_loss_real = tf.reduce_mean(real_output)
-        critic_loss_fake = tf.reduce_mean(fake_output)
-        gen_loss = -tf.reduce_mean(fake_output)
-    
-    wasserstein = tf.reduce_mean(real_output) - tf.reduce_mean(fake_output)
-    gradients_of_generator = gen_tape.gradient(gen_loss, gen.trainable_variables)
-    gradients_of_critic = critic_tape.gradient(critic_loss, critic.trainable_variables)
+        with tf.GradientTape() as gen_tape, tf.GradientTape() as critic_tape:
+            fake_data = gen(noise, training=True)
+            real_output = critic(real_data, training=True)
+            fake_output = critic(fake_data, training=True)
 
-    generator_optimizer.apply_gradients(zip(gradients_of_generator, gen.trainable_variables))
-    critic_optimizer.apply_gradients(zip(gradients_of_critic, critic.trainable_variables))
+            critic_loss = tf.reduce_mean(fake_output) - tf.reduce_mean(real_output)
+            critic_loss_real = tf.reduce_mean(real_output)
+            critic_loss_fake = tf.reduce_mean(fake_output)
+            gen_loss = -tf.reduce_mean(fake_output)
+        
+        wasserstein = tf.reduce_mean(real_output) - tf.reduce_mean(fake_output)
+        gradients_of_generator = gen_tape.gradient(gen_loss, gen.trainable_variables)
+        gradients_of_critic = critic_tape.gradient(critic_loss, critic.trainable_variables)
 
-    tf.group(*(var.assign(tf.clip_by_value(var, -0.01, 0.01)) for var in critic.trainable_variables))
+        self.generator_optimizer.apply_gradients(zip(gradients_of_generator, gen.trainable_variables))
+        self.critic_optimizer.apply_gradients(zip(gradients_of_critic, critic.trainable_variables))
 
-    return wasserstein, gen_loss, critic_loss_real, critic_loss_fake
+        tf.group(*(var.assign(tf.clip_by_value(var, -0.01, 0.01)) for var in critic.trainable_variables))
+
+        return wasserstein, gen_loss, critic_loss_real, critic_loss_fake
 
 
 def generate_synthetic_samples(generator, class_id, headers_name, nb_instance, noise_dim):
@@ -95,6 +105,10 @@ def fake_data_generation(training_data, nb_instances_to_generate, target):
 
     generator_optimizer = tf.keras.optimizers.RMSprop(learning_rate=learning_rate)
     critic_optimizer = tf.keras.optimizers.RMSprop(learning_rate=learning_rate)
+    TS = TrainStep(
+        generator_optimizer=generator_optimizer,
+        critic_optimizer=critic_optimizer
+    )
 
     # storage
     epoch_wasserstein, epoch_gen_loss, epoch_critic_loss_real, epoch_critic_loss_fake = [], [], [], []
@@ -104,13 +118,11 @@ def fake_data_generation(training_data, nb_instances_to_generate, target):
         batch_idx, batch_wasserstein, batch_gen, batch_critic_real, batch_critic_fake = 0, 0, 0, 0, 0
 
         for batch in train_dataset:
-            wasserstein, gen_loss, critic_loss_real, critic_loss_fake = train_step(
+            wasserstein, gen_loss, critic_loss_real, critic_loss_fake = TS(
                 real_data=batch,
                 gen=generator,
                 critic=critic,
-                noise_dim=NOISE_DIM,
-                generator_optimizer=generator_optimizer,
-                critic_optimizer=critic_optimizer
+                noise_dim=NOISE_DIM
             )
 
             epoch_wasserstein.append(wasserstein)
@@ -183,3 +195,33 @@ def WGANOversampling(X_train, y_train):
     X_sample = X_sample.drop(tar, 1)
 
     return round(time.time() - start_time, 2), X_sample, y_sample
+
+
+if __name__ == "__main__":
+    proj_path = Path(__file__).parent.parent.resolve()
+    data_path = proj_path / "data" / "imbalance_defects_prediction" / "7_CK_NET_PROC" / "input" / "Eclipse_PDE_UI--CK_NET_PROC.arff"
+    data = arff.loadarff(data_path)
+
+    df = pd.DataFrame(data[0])
+    df['isBug'] = df['isBug'].astype('str')
+    d = {'b\'YES\'': 1, 'b\'NO\'': 0}
+    df['isBug'] = df['isBug'].astype(str).map(d).fillna(df['isBug'])
+    print("before drop duplicates", df.shape[0])
+    df = df.drop_duplicates()
+    df.reset_index(inplace=True, drop=True)
+    print("after drop duplicates", df.shape[0])
+
+    X = df.iloc[:, :-1]
+    y = df.iloc[:, -1]
+
+    for _ in range(10):
+        rs = random.randint(0, 100000)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, stratify=y, random_state=rs
+        )
+        rt, X_train_new, y_train_new = WGANOversampling(X_train=X_train, y_train=y_train)
+
+        print(X_train_new)
+        print("")
+        print(y_train_new)
+        print("y train ratio: 1:" + str(round(y_train_new.value_counts()[0] / y_train_new.value_counts()[1])))
